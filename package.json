@@ -1,0 +1,40 @@
+{
+	"name": "dotnet-build-by-context",
+	"displayName": "DotNet Build by Context",
+	"description": "Builds all the current open C# files and their cs projects",
+	"version": "0.0.1",
+	"publisher": "devestacion",
+	"engines": {
+		"vscode": "^1.37.0"
+	},
+	"enableProposedApi": true,
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:buildByContext.build"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "buildByContext.build",
+				"title": "Build by Context: Execute on all Open Files"
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"lint": "eslint . --ext .ts,.tsx"
+	},
+	"devDependencies": {
+		"@types/node": "^12.12.0",
+		"@types/vscode": "^1.33.0",
+		"@typescript-eslint/eslint-plugin": "^4.16.0",
+		"@typescript-eslint/parser": "^4.16.0",
+		"eslint": "^7.21.0",
+		"typescript": "^4.2.2"
+	}
+}
