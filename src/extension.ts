@@ -1,64 +1,68 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { Terminal } from 'vscode';
+import { Terminal, TextDocument } from 'vscode';
 import * as fs from 'fs';
 
 
 export function activate(context: vscode.ExtensionContext) {
-	context.subscriptions.push(vscode.commands.registerCommand('buildByContext.build', () => {
-		const terminal = vscode.window.createTerminal({ name: `Build by Context` });
+	context.subscriptions.push(vscode.commands.registerCommand('buildByContext.buildActive', () => {
+		const terminalName = `Build by Context`;
+		let terminal = vscode.window.terminals.find(x => x.name == terminalName);
+		if (!terminal) {
+			terminal = vscode.window.createTerminal({ name: terminalName });
+		}
 		terminal.show();
 
-		let textDocuments = vscode.workspace.textDocuments;
-		if (textDocuments.length <= 0) {
-			terminal.sendText('echo \'Found no documents open to build.\'', false);
+		let activeDocument = vscode.window.activeTextEditor?.document;
+		if (!activeDocument) {
+			terminal.sendText('echo \'Found no active document to build.\'');
 			return;
 		}
-
-		runDotNetBuild(terminal, textDocuments);
+		runDotNetBuild(terminal, activeDocument);
 	}));
 }
 
-function runDotNetBuild(terminal: Terminal, textDocuments: vscode.TextDocument[]): void {
+function runDotNetBuild(terminal: Terminal, document: TextDocument): void {
 	let csProjects = new Array<string>();
 
-	for (let i = 0; i < textDocuments.length; i++) {
-		let document = textDocuments[i];
-		// handling only csharp code
-		if (!document.uri.fsPath.endsWith(".cs")) {
-			continue;
+	// handling only csharp code
+	if (!document.uri.fsPath.endsWith(".cs")) {
+		terminal.sendText(`echo \'Cannot execute on file ${document.uri.fsPath}\'`);
+		return;
+	}
+
+	let foundCsproj = "";
+	let currentDirPath: string | null = document.uri.fsPath;
+	while (foundCsproj == "") {
+		currentDirPath = getNextDirectory(currentDirPath);
+		if (currentDirPath == null) {
+			break;
 		}
 
-		let foundCsproj = "";
-		let currentDirPath: string | null = document.uri.fsPath;
-		while (foundCsproj == "") {
-			currentDirPath = getNextDirectory(currentDirPath);
-			if (currentDirPath == null) {
+		let files = fs.readdirSync(currentDirPath);
+		for (let j = 0; j < files.length; j++) {
+			let fileName = files[j];
+			if (fileName.endsWith(".csproj")) {
+				foundCsproj = `${currentDirPath}\\${fileName}`;
 				break;
 			}
-
-			let files = fs.readdirSync(currentDirPath);
-			for (let j = 0; j < files.length; j++) {
-				let fileName = files[j];
-				if (fileName.endsWith(".csproj")) {
-					foundCsproj = `${currentDirPath}\\${fileName}`;
-					break;
-				}
-			}
-		}
-
-		if (foundCsproj !== "") {
-			csProjects.push(foundCsproj);
 		}
 	}
 
+	if (foundCsproj !== "") {
+		csProjects.push(foundCsproj);
+	}
+
 	if (csProjects.length > 0) {
-		terminal.sendText(`echo \'${csProjects.length} number of csproject files. Executing dotnet build.\'`, false);
+		terminal.sendText(`echo \'${csProjects.length} number of csproject files. Executing dotnet build.\'`);
 		for (let index = 0; index < csProjects.length; index++) {
 			const csProj = csProjects[index];
-			terminal.sendText(`dotnet build \'${csProj}\'`, true);
+			terminal.sendText(`dotnet build \'${csProj}\'`);
 		}
+	}
+	else {
+		terminal.sendText(`echo \'ERROR: No csproj found for the file.\'`);
 	}
 }
 

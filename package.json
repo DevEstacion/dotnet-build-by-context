@@ -1,7 +1,7 @@
 {
 	"name": "dotnet-build-by-context",
 	"displayName": "DotNet Build by Context",
-	"description": "Builds all the current open C# files and their cs projects",
+	"description": "Builds the current active C# file by finding its csproj",
 	"version": "0.0.1",
 	"publisher": "devestacion",
 	"engines": {
@@ -12,14 +12,14 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:buildByContext.build"
+		"onCommand:buildByContext.buildActive"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "buildByContext.build",
-				"title": "Build by Context: Execute on all Open Files"
+				"command": "buildByContext.buildActive",
+				"title": "Build by Context: Execute on Active File"
 			}
 		]
 	},
