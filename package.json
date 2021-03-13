@@ -3,11 +3,11 @@
 	"displayName": "DotNet Build by Context",
 	"description": "Builds the current active C# file by finding its csproj",
 	"version": "0.0.1",
-	"publisher": "devestacion",
+	"publisher": "1devestacion1",
 	"engines": {
 		"vscode": "^1.37.0"
 	},
-	"enableProposedApi": true,
+	"enableProposedApi": false,
 	"categories": [
 		"Other"
 	],
