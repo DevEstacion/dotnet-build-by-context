@@ -1,25 +1,3 @@
-# extension-terminal-sample
+# Build by Context
 
-This extension shows how to leverage the extension terminal API proposed in v1.37 that enables an extension to handle a terminal's input and emit output.
-
-## VS Code API
-
-### `vscode` module
-
-- [window.createTerminal](https://code.visualstudio.com/api/references/vscode-api#window.createTerminal)
-
-### Proposed API
-
-- `window.Pseudoterminal`
-- `window.ExtensionTerminalOptions`
-
-### Contribution Points
-
-- [`contributes.commands`](https://code.visualstudio.com/api/references/contribution-points#contributes.commands)
-
-## Running the Sample
-
-- Run `npm install` in terminal to install dependencies
-- Run the `Run Extension` target in the Debug View. This will:
-	- Start a task `npm: watch` to compile the code
-	- Run the extension in a new VS Code window
+The purpose of this extension is to build open files in a workspace by context. It will walk the tree of the opened files until it finds a csproj or until it reaches the end of the workspace folder
