@@ -7,7 +7,8 @@ import * as fs from 'fs';
 
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('buildByContext.buildActive', () => {
-		const terminalName = `Build by Context`;
+	let messages = new Array<string>();
+	const terminalName = `Build by Context`;
 		let terminal = vscode.window.terminals.find(x => x.name == terminalName);
 		if (!terminal) {
 			terminal = vscode.window.createTerminal({ name: terminalName });
@@ -16,19 +17,20 @@ export function activate(context: vscode.ExtensionContext) {
 
 		let activeDocument = vscode.window.activeTextEditor?.document;
 		if (!activeDocument) {
-			terminal.sendText('echo \'Found no active document to build.\'');
+			messages.push('Found no active document to build.');
 			return;
 		}
-		runDotNetBuild(terminal, activeDocument);
+		runDotNetBuild(terminal, activeDocument, messages);
+		vscode.window.showInformationMessage('Build by Context Finished:' + messages.join(", "));
 	}));
 }
 
-function runDotNetBuild(terminal: Terminal, document: TextDocument): void {
+function runDotNetBuild(terminal: Terminal, document: TextDocument, messages: Array<string>): void {
 	let csProjects = new Array<string>();
 
 	// handling only csharp code
 	if (!document.uri.fsPath.endsWith(".cs")) {
-		terminal.sendText(`echo \'Cannot execute on file ${document.uri.fsPath}\'`);
+		messages.push(`Cannot execute on file ${document.uri.fsPath}`);
 		return;
 	}
 
@@ -55,14 +57,14 @@ function runDotNetBuild(terminal: Terminal, document: TextDocument): void {
 	}
 
 	if (csProjects.length > 0) {
-		terminal.sendText(`echo \'${csProjects.length} number of csproject files. Executing dotnet build.\'`);
+		messages.push(`Found ${csProjects.length} csproject files. Executing dotnet build.`);
 		for (let index = 0; index < csProjects.length; index++) {
 			const csProj = csProjects[index];
 			terminal.sendText(`dotnet build \'${csProj}\'`);
 		}
 	}
 	else {
-		terminal.sendText(`echo \'ERROR: No csproj found for the file.\'`);
+		messages.push(`ERROR: No csproj found for the file.`);
 	}
 }
 
