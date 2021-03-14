@@ -2,7 +2,7 @@
 	"name": "dotnet-build-by-context",
 	"displayName": "DotNet Build by Context",
 	"description": "Builds the current active C# file by finding its csproj",
-	"version": "0.0.1",
+	"version": "0.0.3",
 	"publisher": "1devestacion1",
 	"engines": {
 		"vscode": "^1.37.0"
