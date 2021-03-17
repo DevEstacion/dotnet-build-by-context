@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 function runDotNetBuild(terminal: Terminal, document: TextDocument, messages: Array<string>): void {
 	// handling only csharp code
-	if (!document.uri.fsPath.endsWith(".cs") || !document.uri.fsPath.endsWith(".csproj")) {
+	if (!document.uri.fsPath.endsWith(".cs") && !document.uri.fsPath.endsWith(".csproj")) {
 		messages.push(`Cannot execute on file ${document.uri.fsPath}`);
 		return;
 	}
