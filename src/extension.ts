@@ -27,19 +27,13 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function runDotNetBuild(terminal: Terminal, document: TextDocument, messages: Array<string>): void {
-	// handling only csharp code
-	if (!document.uri.fsPath.endsWith(".cs") && !document.uri.fsPath.endsWith(".csproj")) {
-		messages.push(`Cannot execute on file ${document.uri.fsPath}`);
-		return;
-	}
-
-	let foundCsproj = csproj_map.find(x => x.key == document.uri.fsPath)?.value ?? "";
-	if (document.uri.fsPath.endsWith(".csproj")) {
-		foundCsproj = document.uri.fsPath;
+	let buildableFile = csproj_map.find(x => x.key == document.uri.fsPath)?.value ?? "";
+	if (document.uri.fsPath.endsWith(".csproj") || document.uri.fsPath.endsWith(".sln")) {
+		buildableFile = document.uri.fsPath;
 	}
 
 	let currentDirPath: string | null = document.uri.fsPath;
-	while (foundCsproj == "") {
+	while (buildableFile == "") {
 		currentDirPath = getNextDirectory(currentDirPath);
 		if (currentDirPath == null) {
 			break;
@@ -48,22 +42,22 @@ function runDotNetBuild(terminal: Terminal, document: TextDocument, messages: Ar
 		let files = fs.readdirSync(currentDirPath);
 		for (let j = 0; j < files.length; j++) {
 			let fileName = files[j];
-			if (fileName.endsWith(".csproj")) {
-				foundCsproj = `${currentDirPath}\\${fileName}`;
+			if (fileName.endsWith(".csproj") || fileName.endsWith(".sln")) {
+				buildableFile = `${currentDirPath}\\${fileName}`;
 				break;
 			}
 		}
 	}
 
-	if (foundCsproj !== "") {
+	if (buildableFile !== "") {
 		if (!csproj_map.find(x => x.key == document.uri.fsPath)) {
-			csproj_map.push({ key: document.uri.fsPath, value: foundCsproj });
+			csproj_map.push({ key: document.uri.fsPath, value: buildableFile });
 		}
-		messages.push(`Building csproj \'${foundCsproj}\'`);
-		terminal.sendText(`dotnet build \'${foundCsproj}\'`);
+		messages.push(`Building using detected buildable file \'${buildableFile}\'`);
+		terminal.sendText(`dotnet build \'${buildableFile}\'`);
 	}
 	else {
-		messages.push(`ERROR: No csproj found for the file.`);
+		messages.push(`ERROR: No buildable file found for the file.`);
 	}
 }
 
